@@ -33,6 +33,8 @@ async def ticker(t, receipt_timestamp):
             if item != 'market':
                 # 交易对+周期
                 market_key = market + "_" + item
+                market_key_msg = market + "_" + item + "_msg"
+
                 # 获取存储的值
                 last_market_value = redisConnect.get_str_pickle(market_key)
                 # 换算成秒
@@ -49,15 +51,15 @@ async def ticker(t, receipt_timestamp):
                     change_amount = current_price - last_price
                     # 周期的涨幅
                     change_percent = round(change_amount / last_price, 4) * 100
-
                     """
                     上次预警时间 + 周期 >= 当前时间 并且 振幅的绝对值 >=预期
                     """
-                    if last_timestamp + cycle_time >= receipt_timestamp and abs(change_percent) >= market_warning[item]:
+                    if abs(change_percent) >= market_warning[item]:
                         # 组装消息
                         changePercentMessage = ChangePercentMessage(item, change_percent, change_amount)
                         percentMessageList.add(changePercentMessage)
                         # 重新赋值
+                        redisConnect.set_str(market_key_msg, market_key)
                         redisConnect.set_str_pickle(market_key, t, cycle_time)
         # 如果符合预期,就发消息
         if len(percentMessageList) > 0:
@@ -78,7 +80,7 @@ ticker_cb = {TICKER: ticker}
 def main():
     fh = FeedHandler()
 
-    fh.add_feed(Gateio(symbols=marketList, channels=[TICKER],
+    fh.add_feed(Gateio(symbols=marketList, channels=[CANDLES],
                        callbacks={TICKER: ticker, TRADES: trade, CANDLES: candles}))
     fh.run()
 

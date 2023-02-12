@@ -32,7 +32,7 @@ def sendMarketWarningMessage(todayMessage: message.TodayWarningMessage,
     # 消息标题
     content = '<font size=5 color=lightseagreen >[{0}]行情通知</font> \n <br/> '.format(todayMessage.market)
     # 消息内容
-    content = content + "当前价格：${0}\n今日涨幅：{1}%\n24h涨幅：{2}%\n\n".format(todayMessage.currentPrice,
+    content = content + "当前价格：{0}$\n今日涨幅：{1}%\n24h涨幅：{2}%\n\n".format(todayMessage.currentPrice,
                                                                       todayMessage.todayChangePercent,
                                                                       todayMessage.lastDayChangePercent)
     for percentMessage in percentMessageList:
@@ -46,7 +46,7 @@ def sendMarketWarningMessage(todayMessage: message.TodayWarningMessage,
         else:
             color = "red"
             direction = "上涨"
-        content = content + "<font size=4 color={0}>{1}分钟{2}</font>\n百分比：{3}%\n金额：${4}\n\n".format(
+        content = content + "<font size=4 color={0}>{1}分钟{2}</font>\n百分比：{3}%\n金额：{4}$\n\n".format(
             color, percentMessage.minutes, direction, percentMessage.changePercent, percentMessage.changeAmount)
     # 发送wx消息
     sendWxPusherMessage(content)
